@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "Академия Здоровья",
+    "slug": "akademia-zdorovya",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "ru.akademiazdorovya.staff",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Камера нужна, чтобы снять ролик упражнения.",
+        "NSPhotoLibraryUsageDescription": "Приложение берёт из галереи ролики упражнений.",
+        "NSMicrophoneUsageDescription": "Звук в роликах упражнений не сохраняется.",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1DCEB9",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "ru.akademiazdorovya.staff",
+      "versionCode": 1
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "backgroundColor": "#FAF7EE"
+        }
+      ]
+    ]
+  }
+}

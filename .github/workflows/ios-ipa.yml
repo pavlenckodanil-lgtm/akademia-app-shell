@@ -1,0 +1,52 @@
+# Сборка .ipa для iPhone без подписи: файл подписывается на телефоне в ESign.
+name: iOS ipa (без подписи)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  ipa:
+    runs-on: macos-26
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    timeout-minutes: 60
+    env:
+      EXPO_PUBLIC_API_URL: https://akademia-app.ru/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - name: Подготовка проекта iOS
+        timeout-minutes: 20
+        env:
+          EXPO_NO_TELEMETRY: '1'
+          CI: '1'
+        run: |
+          npx expo prebuild -p ios --clean --no-install
+          cd ios
+          # pod install иногда зависает на сети: ограничиваем время и пробуем ещё раз.
+          for i in 1 2 3; do
+            perl -e 'alarm 480; exec @ARGV' pod install && break
+            echo "pod install не прошёл, попытка $i"; sleep 10
+          done
+          ls Pods >/dev/null
+      - name: Сборка без подписи
+        run: |
+          cd ios
+          WS=$(ls -d *.xcworkspace | head -1)
+          SCHEME="${WS%.xcworkspace}"
+          xcodebuild -workspace "$WS" -scheme "$SCHEME" -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build | tail -40
+          APP=$(ls -d build/Build/Products/Release-iphoneos/*.app | head -1)
+          mkdir -p Payload && cp -R "$APP" Payload/
+          zip -qry ../akademia.ipa Payload
+          ls -la ../akademia.ipa
+      - uses: actions/upload-artifact@v4
+        with:
+          name: akademia-ipa
+          path: akademia.ipa
+          retention-days: 30
